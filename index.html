@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dolly Naagar — Data Analytics & Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F6F1;
+    --panel:#FFFFFF;
+    --ink:#132019;
+    --ink-soft:#4B5850;
+    --line:#DEDACC;
+    --accent:#1E6F5C;      /* analytics green - positive trend */
+    --accent-soft:#E4EFE9;
+    --amber:#D98E2B;       /* dashboard highlight */
+    --amber-soft:#FBEEDA;
+    --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* subtle graph-paper texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:0.35;
+    pointer-events:none;
+    z-index:0;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:0 28px; position:relative; z-index:1;}
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; letter-spacing:-0.02em;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    background:var(--accent);
+    border-radius:1px;
+    display:inline-block;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--amber-soft); color:var(--ink);}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:10;
+    background:rgba(247,246,241,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-top:16px; padding-bottom:16px;
+  }
+  .nav-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:16px;
+  }
+  .nav-links{display:flex; gap:28px; list-style:none;}
+  .nav-links a{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    text-decoration:none;
+    color:var(--ink-soft);
+    transition:color 0.15s;
+  }
+  .nav-links a:hover{color:var(--accent);}
+  @media (max-width:640px){ .nav-links{gap:16px;} .nav-links span.hide-mobile{display:none;} }
+
+  /* HERO */
+  header.hero{padding:88px 0 48px;}
+  .hero h1{
+    font-size:clamp(40px, 7vw, 68px);
+    font-weight:700;
+    line-height:1.02;
+    margin-top:18px;
+  }
+  .hero .role{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink-soft);
+    margin-top:14px;
+  }
+  .hero p.summary{
+    max-width:620px;
+    margin-top:22px;
+    font-size:16px;
+    color:var(--ink-soft);
+  }
+  .hero-cta{
+    margin-top:30px;
+    display:flex; gap:12px; flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:12px 20px;
+    border-radius:var(--radius);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform 0.15s, box-shadow 0.15s;
+    border:1px solid var(--ink);
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-fill{background:var(--ink); color:var(--bg);}
+  .btn-fill:hover{box-shadow:3px 3px 0 var(--accent);}
+  .btn-line{background:transparent; color:var(--ink);}
+  .btn-line:hover{box-shadow:3px 3px 0 var(--ink);}
+
+  /* KPI DASHBOARD STRIP — signature element */
+  .kpi-strip{
+    margin-top:56px;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    border:1px solid var(--ink);
+    background:var(--panel);
+  }
+  .kpi{
+    padding:22px 20px;
+    border-right:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi:last-child{border-right:none;}
+  .kpi .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:32px;
+    font-weight:700;
+  }
+  .kpi .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .kpi svg{position:absolute; right:14px; bottom:14px; opacity:0.9;}
+  @media (max-width:640px){
+    .kpi-strip{grid-template-columns:1fr;}
+    .kpi{border-right:none; border-bottom:1px solid var(--line);}
+    .kpi:last-child{border-bottom:none;}
+  }
+
+  /* SECTIONS */
+  section{padding:72px 0;}
+  section + section{border-top:1px solid var(--line);}
+  .section-head{margin-bottom:36px;}
+  .section-head h2{font-size:28px; margin-top:8px;}
+
+  /* SKILLS */
+  .skill-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  @media (max-width:640px){ .skill-grid{grid-template-columns:1fr;} }
+  .skill-group{background:var(--panel); padding:24px;}
+  .skill-group h3{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--accent);
+    font-weight:500;
+    margin-bottom:14px;
+  }
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-size:13px;
+    padding:6px 12px;
+    background:var(--accent-soft);
+    color:var(--ink);
+    border-radius:20px;
+  }
+  .skill-group.soft .chip{background:var(--amber-soft);}
+
+  /* EXPERIENCE TIMELINE */
+  .timeline{position:relative; padding-left:28px;}
+  .timeline::before{
+    content:"";
+    position:absolute; left:5px; top:6px; bottom:6px;
+    width:1px; background:var(--line);
+  }
+  .t-item{position:relative; padding-bottom:40px;}
+  .t-item:last-child{padding-bottom:0;}
+  .t-item::before{
+    content:"";
+    position:absolute; left:-28px; top:6px;
+    width:11px; height:11px;
+    background:var(--bg);
+    border:2px solid var(--accent);
+    border-radius:50%;
+  }
+  .t-date{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+  .t-item h3{font-size:19px; margin-top:6px;}
+  .t-item .org{color:var(--accent); font-size:14px; font-weight:500; margin-top:2px;}
+  .t-item ul{margin-top:12px; padding-left:18px; color:var(--ink-soft); font-size:14.5px;}
+  .t-item li{margin-bottom:6px;}
+
+  /* PROJECT */
+  .project-card{
+    border:1px solid var(--ink);
+    background:var(--panel);
+    padding:28px;
+  }
+  .project-card .tag-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .project-card .tag-row span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+  }
+  .project-card h3{font-size:20px; margin-top:4px;}
+  .project-card ul{margin-top:16px; padding-left:18px; font-size:14.5px; color:var(--ink-soft);}
+  .project-card li{margin-bottom:8px;}
+  .sparkline{margin-top:20px;}
+
+  /* DESIGN GALLERY */
+  .design-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  @media (max-width:720px){ .design-grid{grid-template-columns:1fr;} }
+  .design-card{
+    border:1px solid var(--ink);
+    background:var(--panel);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .design-thumb{
+    width:100%;
+    aspect-ratio:3/4;
+    overflow:hidden;
+    background:var(--ink);
+  }
+  .design-thumb img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform 0.35s ease;
+  }
+  .design-card:hover .design-thumb img{transform:scale(1.05);}
+  .design-meta{padding:16px 18px;}
+  .design-meta h3{font-size:15px; font-weight:600;}
+  .design-meta .d-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    color:var(--accent);
+    letter-spacing:0.04em;
+    margin-top:4px;
+    display:block;
+  }
+
+  /* CERTIFICATIONS */
+  .cert-list{list-style:none;}
+  .cert-list li{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:20px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .cert-list li:first-child{padding-top:0;}
+  .cert-name{font-weight:500; font-size:15.5px;}
+  .cert-issuer{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  /* EDUCATION */
+  .edu-item{padding:18px 0; border-bottom:1px solid var(--line);}
+  .edu-item:last-child{border-bottom:none;}
+  .edu-item .degree{font-weight:600; font-size:16px;}
+  .edu-item .school{color:var(--ink-soft); font-size:14px; margin-top:2px;}
+  .edu-item .year{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--accent);
+    margin-top:4px;
+  }
+
+  /* LEADERSHIP note */
+  .leader-note{
+    margin-top:28px;
+    padding:20px 24px;
+    background:var(--accent-soft);
+    border-left:3px solid var(--accent);
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .leader-note strong{font-family:'Space Grotesk', sans-serif;}
+
+  /* CONTACT */
+  .contact-card{
+    border:1px solid var(--ink);
+    background:var(--panel);
+    padding:40px;
+    text-align:left;
+  }
+  .contact-card h2{font-size:26px;}
+  .contact-card p{color:var(--ink-soft); margin-top:10px; max-width:480px;}
+  .contact-links{margin-top:26px; display:flex; flex-wrap:wrap; gap:14px;}
+  .contact-row{
+    display:flex; flex-direction:column; gap:14px; margin-top:26px;
+    font-family:'IBM Plex Mono', monospace; font-size:13.5px;
+  }
+  .contact-row a{text-decoration:none; color:var(--ink);}
+  .contact-row a:hover{color:var(--accent);}
+  .contact-row span.k{color:var(--ink-soft); display:inline-block; width:80px;}
+
+  footer{
+    padding:32px 0 48px;
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="nav-name">Dolly Naagar</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#design">Design</a></li>
+      <li><a href="#certifications" class="hide-mobile">Certifications</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero wrap" id="about">
+  <div class="eyebrow">Delhi, India · Open to opportunities</div>
+  <h1>Dolly Naagar</h1>
+  <div class="role">Computer Science Undergraduate — Data Analytics &amp; Visualization</div>
+  <p class="summary">
+    I turn messy spreadsheets into dashboards people actually use. Currently studying Computer
+    Science at the University of Delhi, with hands-on practice in SQL, Tableau, and Excel from
+    internships and simulations — plus a design background that keeps every chart readable, not
+    just accurate.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-fill" href="mailto:naagardolly55@gmail.com">Email me</a>
+    <a class="btn btn-line" href="https://www.linkedin.com/in/dolly-naagar-791b41331/" target="_blank" rel="noopener">LinkedIn ↗</a>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="num">3</div>
+      <div class="label">Internships &amp; simulations</div>
+      <svg width="60" height="24" viewBox="0 0 60 24"><polyline points="0,20 12,14 24,16 36,8 48,10 60,3" fill="none" stroke="#1E6F5C" stroke-width="2"/></svg>
+    </div>
+    <div class="kpi">
+      <div class="num">2</div>
+      <div class="label">Certifications earned</div>
+      <svg width="60" height="24" viewBox="0 0 60 24"><rect x="0" y="12" width="8" height="12" fill="#D98E2B"/><rect x="14" y="6" width="8" height="18" fill="#D98E2B"/><rect x="28" y="14" width="8" height="10" fill="#D98E2B"/><rect x="42" y="2" width="8" height="22" fill="#D98E2B"/></svg>
+    </div>
+    <div class="kpi">
+      <div class="num">8+</div>
+      <div class="label">Tools &amp; platforms</div>
+      <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#1E6F5C" stroke-width="2" stroke-dasharray="47 16"/></svg>
+    </div>
+  </div>
+</header>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">What I work with</div>
+      <h2>Skills</h2>
+    </div>
+    <div class="skill-grid">
+      <div class="skill-group">
+        <h3>Databases &amp; Tools</h3>
+        <div class="chips">
+          <span class="chip">SQL (MS SQL Server)</span>
+          <span class="chip">MS Excel</span>
+          <span class="chip">MS Word</span>
+          <span class="chip">PowerPoint</span>
+          <span class="chip">Google Docs</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Data Analytics</h3>
+        <div class="chips">
+          <span class="chip">Data Cleaning</span>
+          <span class="chip">Data Visualization</span>
+          <span class="chip">Dashboard Development</span>
+          <span class="chip">Trend Analysis</span>
+          <span class="chip">Reporting</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Design &amp; Workflow</h3>
+        <div class="chips">
+          <span class="chip">Canva</span>
+          <span class="chip">Adobe Photoshop</span>
+          <span class="chip">Figma</span>
+          <span class="chip">NotebookLM</span>
+          <span class="chip">Julius AI</span>
+          <span class="chip">Stitch</span>
+          <span class="chip">Comet</span>
+        </div>
+      </div>
+      <div class="skill-group soft">
+        <h3>Soft Skills</h3>
+        <div class="chips">
+          <span class="chip">Analytical Thinking</span>
+          <span class="chip">Problem Solving</span>
+          <span class="chip">Teamwork</span>
+          <span class="chip">Communication</span>
+          <span class="chip">Time Management</span>
+          <span class="chip">Attention to Detail</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Where I've worked</div>
+      <h2>Experience</h2>
+    </div>
+    <div class="timeline">
+      <div class="t-item">
+        <div class="t-date">June 2025</div>
+        <h3>Data Analytics Virtual Intern</h3>
+        <div class="org">Deloitte Australia — Forage Virtual Experience</div>
+        <ul>
+          <li>Completed a full data analytics job simulation centered on business optimization.</li>
+          <li>Cleaned and prepared datasets in Excel for downstream analysis.</li>
+          <li>Built interactive Tableau dashboards to visualize key performance metrics.</li>
+          <li>Translated data patterns into actionable business recommendations.</li>
+        </ul>
+      </div>
+      <div class="t-item">
+        <div class="t-date">Mar 2025 – Mar 2026</div>
+        <h3>Graphic Design Intern</h3>
+        <div class="org">S.R. Foundation</div>
+        <ul>
+          <li>Designed digital layout assets for corporate branding and social campaigns.</li>
+          <li>Worked with cross-functional teams to deliver consistent visual media.</li>
+          <li>Kept every asset aligned with organizational brand guidelines.</li>
+        </ul>
+      </div>
+      <div class="t-item">
+        <div class="t-date">Sep 2025 – Mar 2026</div>
+        <h3>Content Writer</h3>
+        <div class="org">Illuminati — Photography Society</div>
+        <ul>
+          <li>Wrote copy and strategy scripts for social channels and campaigns.</li>
+          <li>Partnered with the design and production team to grow audience engagement.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Something I built</div>
+      <h2>Projects</h2>
+    </div>
+    <div class="project-card">
+      <h3>Sales Data Analysis Dashboard</h3>
+      <div class="tag-row"><span>MS Excel</span><span>Tableau</span><span>Personal Project</span></div>
+      <ul>
+        <li>Cleaned and organized raw sales records in Excel, removing inconsistencies.</li>
+        <li>Ran trend analysis to surface high-performing segments and commercial insights.</li>
+        <li>Built an interactive Tableau dashboard for ongoing performance reporting.</li>
+        <li>Presented findings with clear charts and KPI metrics for quick reading.</li>
+      </ul>
+      <svg class="sparkline" width="100%" height="48" viewBox="0 0 400 48" preserveAspectRatio="none">
+        <polyline points="0,40 40,32 80,36 120,20 160,26 200,14 240,18 280,8 320,12 360,4 400,10" fill="none" stroke="#1E6F5C" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="design">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Graphic design</div>
+      <h2>Design Work</h2>
+    </div>
+    <div class="design-grid">
+      <div class="design-card">
+        <div class="design-thumb"><img src="Soil_Day.jpg" alt="World Soil Day campaign poster for S.R. Foundation"></div>
+        <div class="design-meta">
+          <h3>World Soil Day Campaign</h3>
+          <span class="d-tag">S.R. Foundation · Poster</span>
+        </div>
+      </div>
+      <div class="design-card">
+        <div class="design-thumb"><img src="Subhash_Chandra.png" alt="Subhash Chandra Bose Jayanti social media post for S.R. Foundation"></div>
+        <div class="design-meta">
+          <h3>Netaji Jayanti Tribute</h3>
+          <span class="d-tag">S.R. Foundation · Social Post</span>
+        </div>
+      </div>
+      <div class="design-card">
+        <div class="design-thumb"><img src="World_Day_for_the_Poor2.png" alt="World Day for the Poor awareness poster for S.R. Foundation"></div>
+        <div class="design-meta">
+          <h3>World Day for the Poor</h3>
+          <span class="d-tag">S.R. Foundation · Poster</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Proof of work</div>
+      <h2>Certifications &amp; Leadership</h2>
+    </div>
+    <ul class="cert-list">
+      <li>
+        <span class="cert-name">AI Tools and ChatGPT Workshop Certificate</span>
+        <span class="cert-issuer">be10X · June 2026</span>
+      </li>
+      <li>
+        <span class="cert-name">Data Analytics Job Simulation Certificate</span>
+        <span class="cert-issuer">Deloitte Australia (Forage)</span>
+      </li>
+    </ul>
+    <div class="leader-note">
+      <strong>Hostel Floor Captain</strong> — Led floor operations and resolved team conflicts, building
+      hands-on time management and leadership experience. Active member of the
+      <strong>Illuminati Photography Society</strong>, <strong>Maniera Art Society</strong>, and the
+      <strong>College Cultural Committee</strong>.
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Academic background</div>
+      <h2>Education</h2>
+    </div>
+    <div class="edu-item">
+      <div class="degree">Bachelor of Science (Hons.) in Computer Science</div>
+      <div class="school">Keshav Mahavidyalaya, University of Delhi</div>
+      <div class="year">2024 – 2027</div>
+    </div>
+    <div class="edu-item">
+      <div class="degree">Senior Secondary Education (CBSE)</div>
+      <div class="school">Government Model Sanskriti Sr. Sec. School</div>
+      <div class="year">Passed 2023</div>
+    </div>
+    <div class="edu-item">
+      <div class="degree">Secondary Education (State Board)</div>
+      <div class="school">Kinder Kin Sr. Sec. School</div>
+      <div class="year">Passed 2021</div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-card">
+      <div class="eyebrow">Get in touch</div>
+      <h2>Let's talk</h2>
+      <p>Open to internships and roles in data analytics, and happy to walk through any of the dashboards above in more detail.</p>
+      <div class="contact-row">
+        <a href="mailto:naagardolly55@gmail.com"><span class="k">Email</span>naagardolly55@gmail.com</a>
+        <a href="tel:+919992956400"><span class="k">Phone</span>+91 99929 56400</a>
+        <a href="https://www.linkedin.com/in/dolly-naagar-791b41331/" target="_blank" rel="noopener"><span class="k">LinkedIn</span>linkedin.com/in/dolly-naagar-791b41331</a>
+        <span><span class="k">Location</span>Delhi, India</span>
+      </div>
+      <div class="contact-links">
+        <a class="btn btn-fill" href="mailto:naagardolly55@gmail.com">Email me</a>
+        <a class="btn btn-line" href="https://www.linkedin.com/in/dolly-naagar-791b41331/" target="_blank" rel="noopener">Connect on LinkedIn ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>Built by Dolly Naagar · Delhi, India</footer>
+
+</body>
+</html>
